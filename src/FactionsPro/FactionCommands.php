@@ -11,6 +11,7 @@ use pocketmine\utils\TextFormat;
 
 class FactionCommands{
 
+	/** @var FactionMain */
 	public $plugin;
 
 	public function __construct(FactionMain $pg){
@@ -1441,7 +1442,7 @@ class FactionCommands{
 		return true;
 	}
 
-	public function alphanum($string){
+	public function alphanum(string $string) : bool{
 		if(function_exists('ctype_alnum')){
 			$return = ctype_alnum($string);
 		}else{

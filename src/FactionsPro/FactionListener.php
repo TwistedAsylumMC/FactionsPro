@@ -15,13 +15,14 @@ use pocketmine\utils\TextFormat;
 
 class FactionListener implements Listener{
 
+	/** @var FactionMain */
 	public $plugin;
 
 	public function __construct(FactionMain $pg){
 		$this->plugin = $pg;
 	}
 
-	public function factionChat(PlayerChatEvent $PCE){
+	public function factionChat(PlayerChatEvent $PCE) : void{
 
 		$player = $PCE->getPlayer()->getName();
 		//MOTD Check
@@ -31,8 +32,6 @@ class FactionListener implements Listener{
 				$PCE->getPlayer()->sendMessage($this->plugin->formatMessage("Timed out. Please use /f desc again."));
 				$this->plugin->db->query("DELETE FROM motdrcv WHERE player='$player';");
 				$PCE->setCancelled(true);
-
-				return true;
 			}else{
 				$motd = $PCE->getMessage();
 				$faction = $this->plugin->getPlayerFaction($player);
@@ -41,7 +40,7 @@ class FactionListener implements Listener{
 				$PCE->getPlayer()->sendMessage($this->plugin->formatMessage("Successfully updated the faction description. Type /f info.", true));
 			}
 
-			return true;
+			return;
 		}
 		if(isset($this->plugin->factionChatActive[$player])){
 			if($this->plugin->factionChatActive[$player]){
@@ -74,13 +73,13 @@ class FactionListener implements Listener{
 		}
 	}
 
-	public function factionPVP(EntityDamageEvent $factionDamage){
+	public function factionPVP(EntityDamageEvent $factionDamage) : void{
 		if($factionDamage instanceof EntityDamageByEntityEvent){
 			if(!($factionDamage->getEntity() instanceof Player) or !($factionDamage->getDamager() instanceof Player)){
-				return true;
+				return;
 			}
 			if(($this->plugin->isInFaction($factionDamage->getEntity()->getPlayer()->getName()) == false) or ($this->plugin->isInFaction($factionDamage->getDamager()->getPlayer()->getName()) == false)){
-				return true;
+				return;
 			}
 			if(($factionDamage->getEntity() instanceof Player) and ($factionDamage->getDamager() instanceof Player)){
 				$player1 = $factionDamage->getEntity()->getPlayer()->getName();
@@ -94,39 +93,33 @@ class FactionListener implements Listener{
 		}
 	}
 
-	public function factionBlockBreakProtect(BlockBreakEvent $event){
+	public function factionBlockBreakProtect(BlockBreakEvent $event) : void{
 		$x = $event->getBlock()->getX();
 		$z = $event->getBlock()->getZ();
 		$level = $event->getBlock()->getLevel()->getName();
 		if($this->plugin->pointIsInPlot($x, $z, $level)){
 			if($this->plugin->factionFromPoint($x, $z, $level) === $this->plugin->getFaction($event->getPlayer()->getName())){
 				return;
-			}else{
-				$event->setCancelled(true);
-				$event->getPlayer()->sendMessage($this->plugin->formatMessage("You cannot break blocks here. This is already a property of a faction. Type /f plotinfo for details."));
-
-				return;
 			}
+			$event->setCancelled(true);
+			$event->getPlayer()->sendMessage($this->plugin->formatMessage("You cannot break blocks here. This is already a property of a faction. Type /f plotinfo for details."));
 		}
 	}
 
-	public function factionBlockPlaceProtect(BlockPlaceEvent $event){
+	public function factionBlockPlaceProtect(BlockPlaceEvent $event) : void{
 		$x = $event->getBlock()->getX();
 		$z = $event->getBlock()->getZ();
 		$level = $event->getBlock()->getLevel()->getName();
 		if($this->plugin->pointIsInPlot($x, $z, $level)){
 			if($this->plugin->factionFromPoint($x, $z, $level) == $this->plugin->getFaction($event->getPlayer()->getName())){
 				return;
-			}else{
-				$event->setCancelled(true);
-				$event->getPlayer()->sendMessage($this->plugin->formatMessage("You cannot place blocks here. This is already a property of a faction. Type /f plotinfo for details."));
-
-				return;
 			}
+			$event->setCancelled(true);
+			$event->getPlayer()->sendMessage($this->plugin->formatMessage("You cannot place blocks here. This is already a property of a faction. Type /f plotinfo for details."));
 		}
 	}
 
-	public function onKill(PlayerDeathEvent $event){
+	public function onKill(PlayerDeathEvent $event) : void{
 		$ent = $event->getEntity();
 		$cause = $event->getEntity()->getLastDamageCause();
 		if($cause instanceof EntityDamageByEntityEvent){
@@ -162,7 +155,7 @@ class FactionListener implements Listener{
 		}
 	}
 
-	public function onPlayerJoin(PlayerJoinEvent $event){
+	public function onPlayerJoin(PlayerJoinEvent $event) : void{
 		$this->plugin->updateTag($event->getPlayer()->getName());
 	}
 }
