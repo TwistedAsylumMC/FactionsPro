@@ -4,7 +4,7 @@ description: A Plugin For Easily Managing Factions
 version: 1.3.20
 main: FactionsPro\FactionMain
 api: [3.0.0]
-softdepend: ["AntiSpamPro"]
+softdepend: ["AntiSpamPro", "PureChat"]
 extensions: [sqlite3]
 commands:
   f:
